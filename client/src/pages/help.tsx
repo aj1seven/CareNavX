@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
+import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -167,31 +168,7 @@ export default function Help() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/">
-              <Button variant="ghost">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Welcome
-              </Button>
-            </Link>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <HelpCircle className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-medium">Help & Support</span>
-            </div>
-            
-            <Badge variant="outline" className="text-green-600 border-green-200">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Support Online
-            </Badge>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">

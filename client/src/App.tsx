@@ -9,6 +9,7 @@ import OnboardingInsurance from "@/pages/onboarding-insurance";
 import OnboardingMedical from "@/pages/onboarding-medical";
 import OnboardingConfirmation from "@/pages/onboarding-confirmation";
 import Help from "@/pages/help";
+import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/onboarding/medical" component={OnboardingMedical} />
       <Route path="/onboarding/confirmation" component={OnboardingConfirmation} />
       <Route path="/help" component={Help} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -28,10 +28,10 @@ export interface IStorage {
   
   // Dashboard stats
   getDashboardStats(): Promise<{
-    patientsToday: number;
-    pendingOnboarding: number;
-    emergencyCases: number;
-    completedOnboarding: number;
+    totalPatients: number;
+    completedToday: number;
+    inProgress: number;
+    averageTime: number;
   }>;
   
   // User operations
@@ -79,8 +79,12 @@ export class MemStorage implements IStorage {
       insurancePolicyNumber: insertPatient.insurancePolicyNumber || null,
       insuranceGroupNumber: insertPatient.insuranceGroupNumber || null,
       insuranceStatus: insertPatient.insuranceStatus || null,
+      medicalHistory: insertPatient.medicalHistory || null,
       allergies: insertPatient.allergies || null,
       medications: insertPatient.medications || null,
+      onboardingStep: insertPatient.onboardingStep ?? 1,
+      isCompleted: insertPatient.isCompleted ?? false,
+      isEmergency: insertPatient.isEmergency ?? false,
       admissionLocation: insertPatient.admissionLocation || null,
       createdAt: now,
       updatedAt: now
@@ -154,28 +158,29 @@ export class MemStorage implements IStorage {
   }
 
   async getDashboardStats(): Promise<{
-    patientsToday: number;
-    pendingOnboarding: number;
-    emergencyCases: number;
-    completedOnboarding: number;
+    totalPatients: number;
+    completedToday: number;
+    inProgress: number;
+    averageTime: number;
   }> {
     const patients = Array.from(this.patients.values());
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const patientsToday = patients.filter(p => 
-      p.createdAt && p.createdAt >= today
+    const totalPatients = patients.length;
+    const completedToday = patients.filter(p => 
+      p.isCompleted && p.updatedAt && p.updatedAt >= today
     ).length;
+    const inProgress = patients.filter(p => !p.isCompleted && p.onboardingStep > 0).length;
     
-    const pendingOnboarding = patients.filter(p => !p.isCompleted).length;
-    const emergencyCases = patients.filter(p => p.isEmergency).length;
-    const completedOnboarding = patients.filter(p => p.isCompleted).length;
+    // Calculate average time (simplified - just return 8 minutes for now)
+    const averageTime = 8;
 
     return {
-      patientsToday,
-      pendingOnboarding,
-      emergencyCases,
-      completedOnboarding
+      totalPatients,
+      completedToday,
+      inProgress,
+      averageTime
     };
   }
 

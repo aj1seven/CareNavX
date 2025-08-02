@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import NavigationBar from "@/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import {
   Phone,
   Home,
   Clock,
-  Navigation,
+  Navigation as MapNavigation,
   Star
 } from "lucide-react";
 
@@ -119,24 +120,7 @@ export default function OnboardingConfirmation() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-green-100 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-medium">Registration Complete</span>
-            </div>
-            
-            <Badge className="bg-green-100 text-green-800 border-green-200">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Successfully Registered
-            </Badge>
-          </div>
-        </div>
-      </header>
+      <NavigationBar currentStep="confirmation" patientId={patientId || undefined} />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -183,7 +167,7 @@ export default function OnboardingConfirmation() {
               <div className="space-y-4">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center mb-2">
-                    <Navigation className="h-4 w-4 text-blue-600 mr-2" />
+                    <MapNavigation className="h-4 w-4 text-blue-600 mr-2" />
                     <span className="font-medium text-blue-900">Directions</span>
                   </div>
                   <p className="text-sm text-blue-800">{locationDetails.directions}</p>

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import Navigation from "@/components/navigation";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -113,28 +114,7 @@ export default function OnboardingMedical() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-100 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Button variant="ghost" onClick={() => setLocation(`/onboarding/insurance?patientId=${patientId}`)}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Insurance
-            </Button>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
-                <Heart className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-medium">Medical History</span>
-            </div>
-            
-            <div className="text-sm text-gray-500">
-              Step 3 of 4
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navigation currentStep="medical" patientId={patientId} />
 
       {/* Progress Bar */}
       <div className="bg-white/60 backdrop-blur-sm border-b border-blue-100">

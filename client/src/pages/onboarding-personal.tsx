@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import Navigation from "@/components/navigation";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -172,33 +173,7 @@ export default function OnboardingPersonal() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-100 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Button variant="ghost" onClick={() => setLocation('/')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Welcome
-            </Button>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-medium">Personal Information</span>
-            </div>
-            
-            {isEmergency && (
-              <div className="bg-red-100 px-3 py-1 rounded-full">
-                <span className="text-red-600 font-medium text-sm flex items-center">
-                  <Ambulance className="h-3 w-3 mr-1" />
-                  Emergency Mode
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navigation currentStep="personal" patientId={patientId || undefined} />
 
       {/* Progress Bar */}
       <div className="bg-white/60 backdrop-blur-sm border-b border-blue-100">
