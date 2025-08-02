@@ -203,6 +203,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat endpoint for patient support
+  app.post("/api/chat", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+      
+      // Use OpenAI to analyze patient query
+      const { analyzePatientQuery } = await import('./openai');
+      const analysis = await analyzePatientQuery(message);
+      
+      res.json({
+        response: analysis.response,
+        intent: analysis.intent,
+        suggestions: analysis.suggestions,
+        urgency: analysis.urgency
+      });
+    } catch (error) {
+      console.error("Chat error:", error);
+      res.status(500).json({ 
+        response: "I'm sorry, I'm experiencing technical difficulties. Please contact our support team at (555) 123-CARE for immediate assistance.",
+        error: "Chat service temporarily unavailable" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

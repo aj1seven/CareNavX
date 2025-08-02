@@ -1,8 +1,8 @@
-# CareNav-X Hospital Patient Onboarding System
+# CareNav Hospital Patient Onboarding System
 
 ## Overview
 
-CareNav-X is a comprehensive hospital patient onboarding system designed to streamline the patient intake process. The application features a modern dashboard for tracking patient statistics, a multi-step onboarding form with emergency mode support, and intelligent document analysis using OpenAI's vision capabilities. The system handles both regular and emergency patient admissions while providing real-time activity tracking and hospital navigation features.
+CareNav is a patient-facing hospital onboarding application designed to provide a smooth, digital-first registration experience. The multi-page application guides patients through a complete onboarding journey from welcome to room assignment, featuring AI-powered document analysis, intelligent chatbot support, and modern, accessible UI design. The system serves patients directly, allowing them to complete hospital registration remotely before their visit.
 
 ## User Preferences
 
@@ -11,13 +11,14 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React with TypeScript in a single-page application (SPA) architecture
-- **Routing**: Wouter for lightweight client-side routing
-- **UI Components**: Radix UI primitives with shadcn/ui component library for consistent design
-- **Styling**: Tailwind CSS with custom CSS variables for theming and responsive design
+- **Framework**: React with TypeScript in a multi-page application architecture
+- **Routing**: Wouter for lightweight client-side routing with dedicated pages for each onboarding step
+- **UI Components**: Radix UI primitives with shadcn/ui component library for consistent, patient-friendly design
+- **Styling**: Tailwind CSS with custom gradients and patient-focused color scheme (blue-to-green gradients)
 - **State Management**: TanStack Query (React Query) for server state management and data fetching
-- **Form Handling**: React Hook Form with Zod validation for type-safe form validation
+- **Form Handling**: React Hook Form with Zod validation for type-safe form validation across multiple steps
 - **Build Tool**: Vite for fast development and optimized production builds
+- **Page Structure**: Welcome → Personal Info → Insurance → Medical History → Confirmation flow
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
@@ -45,6 +46,8 @@ Preferred communication style: Simple, everyday language.
 - **OpenAI API**: GPT-4o model for document analysis and patient data extraction from uploaded images
 - **Document Analysis**: Vision-based text extraction from insurance cards, medical documents, and forms
 - **Smart Data Extraction**: Automated parsing of patient information including personal details, insurance data, and medical history
+- **Intelligent Chatbot**: AI-powered patient support chatbot for onboarding assistance and FAQ handling
+- **Patient Query Analysis**: Smart analysis of patient questions with contextual responses and urgency detection
 
 #### Development and Deployment
 - **Replit Integration**: Cartographer plugin for development environment mapping and runtime error overlays
@@ -52,11 +55,13 @@ Preferred communication style: Simple, everyday language.
 - **Environment Management**: Environment variable configuration for database and API credentials
 
 #### UI and User Experience
-- **Component Library**: Extensive Radix UI component set including dialogs, forms, navigation, and data display components
-- **Icons**: Lucide React for consistent iconography
+- **Component Library**: Extensive Radix UI component set optimized for patient-facing interactions
+- **Icons**: Lucide React for consistent, friendly iconography
 - **Date Handling**: date-fns for date formatting and manipulation
 - **Class Management**: clsx and tailwind-merge for conditional styling
-- **Mobile Responsiveness**: Custom mobile detection hooks and responsive design patterns
+- **Mobile Responsiveness**: Full mobile optimization for patients using phones and tablets
+- **Patient-Centric Design**: Gradient backgrounds, clear progress indicators, and reassuring visual elements
+- **Accessibility**: High contrast, clear typography, and screen reader support for inclusive design
 
 #### File and Asset Management
 - **File Upload Processing**: Local file system storage with configurable upload directories
