@@ -17,14 +17,13 @@ import Navigation from "@/components/navigation";
 import { 
   ArrowLeft, 
   ArrowRight, 
-  Upload, 
-  Bot,
   User,
   Ambulance,
   CheckCircle,
   Phone,
   Home
 } from "lucide-react";
+import FileUpload from "@/components/file-upload";
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -39,8 +38,8 @@ const personalInfoSchema = z.object({
 
 export default function OnboardingPersonal() {
   const [, setLocation] = useLocation();
-  const [uploadingDocument, setUploadingDocument] = useState(false);
   const [patientId, setPatientId] = useState<string | null>(null);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -77,9 +76,9 @@ export default function OnboardingPersonal() {
       
       // Navigate to next step
       if (isEmergency) {
-        setLocation(`/onboarding/confirmation?patientId=${patient.id}&emergency=true`);
+        setLocation(`/onboarding/confirmation?patientId=${patient._id}&emergency=true`);
       } else {
-        setLocation(`/onboarding/insurance?patientId=${patient.id}`);
+        setLocation(`/onboarding/medical?patientId=${patient._id}`);
       }
     },
     onError: () => {
@@ -91,85 +90,20 @@ export default function OnboardingPersonal() {
     },
   });
 
-  const uploadDocumentMutation = useMutation({
-    mutationFn: async (file: File) => {
-      if (!patientId) {
-        // Create patient first if uploading document
-        const formData = form.getValues();
-        const patient = await createPatientMutation.mutateAsync(formData);
-        
-        const formDataFile = new FormData();
-        formDataFile.append('document', file);
-        
-        const response = await fetch(`/api/patients/${patient.id}/documents`, {
-          method: 'POST',
-          body: formDataFile,
-          credentials: 'include',
-        });
-        
-        if (!response.ok) {
-          throw new Error('Upload failed');
-        }
-        
-        return response.json();
-      }
-      
-      const formDataFile = new FormData();
-      formDataFile.append('document', file);
-      
-      const response = await fetch(`/api/patients/${patientId}/documents`, {
-        method: 'POST',
-        body: formDataFile,
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (result) => {
-      toast({
-        title: "Document Uploaded Successfully",
-        description: "Our AI has analyzed your document and filled in the details automatically.",
-      });
-      
-      // Auto-fill form with extracted data if available
-      if (result.analysisResult && !result.analysisResult.error) {
-        // Here you would update form fields based on extracted data
-        toast({
-          title: "Smart Auto-Fill Complete",
-          description: "We've automatically filled in your information from the document.",
-        });
-      }
-    },
-    onError: () => {
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload and analyze document. You can continue manually.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setUploadingDocument(true);
-    try {
-      await uploadDocumentMutation.mutateAsync(file);
-    } finally {
-      setUploadingDocument(false);
-    }
-  };
 
   const onSubmit = (data: any) => {
     createPatientMutation.mutate(data);
   };
 
-  const progress = 20; // First step
+  const handleDocumentUploaded = (result: any) => {
+    toast({
+      title: "File Uploaded Successfully",
+      description: `${result.document.type.replace('_', ' ')} has been saved to the database.`,
+    });
+  };
+
+  const progress = 33; // First step of 3
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -180,7 +114,7 @@ export default function OnboardingPersonal() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="mb-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Step 1 of {isEmergency ? '2' : '4'}</span>
+              <span>Step 1 of {isEmergency ? '2' : '3'}</span>
               <span>{progress}% Complete</span>
             </div>
           </div>
@@ -202,35 +136,33 @@ export default function OnboardingPersonal() {
           </CardHeader>
           
           <CardContent className="space-y-8">
-            {/* AI Document Upload Section */}
-            <div className="border-2 border-dashed border-blue-200 rounded-xl p-8 text-center bg-blue-50/50 hover:border-blue-300 transition-colors">
+
+
+            {/* Document Verification Section */}
+            <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 text-center bg-blue-50/50 hover:border-blue-300 transition-colors">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Bot className="h-8 w-8 text-blue-600" />
+                <CheckCircle className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Document Scanner</h3>
-              <p className="text-gray-600 mb-6">
-                Upload your ID card, insurance card, or medical documents for instant auto-fill
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Required Document Upload</h3>
+              <p className="text-gray-600 mb-4">
+                Upload your Medical History, Aadhaar Card, and PAN Card
               </p>
               <Button
                 type="button"
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => document.getElementById('file-upload')?.click()}
-                disabled={uploadingDocument}
+                onClick={() => setShowDocumentVerification(!showDocumentVerification)}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {uploadingDocument ? "Analyzing Document..." : "Upload Document"}
+                {showDocumentVerification ? "Hide File Upload" : "Upload Required Documents"}
               </Button>
-              <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                accept="image/*,.pdf"
-                onChange={handleFileUpload}
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Supports: JPG, PNG, PDF • Max size: 10MB
-              </p>
             </div>
+
+            {/* File Upload Component */}
+            {showDocumentVerification && (
+              <FileUpload 
+                patientId={patientId || undefined}
+                onDocumentUploaded={handleDocumentUploaded}
+              />
+            )}
 
             {/* Manual Form */}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -399,7 +331,7 @@ export default function OnboardingPersonal() {
                     "Saving Information..."
                   ) : (
                     <>
-                      {isEmergency ? "Complete Registration" : "Continue to Insurance"}
+                      {isEmergency ? "Complete Registration" : "Continue to Medical History"}
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}

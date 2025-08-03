@@ -24,7 +24,7 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
 
-  /* CareNav-X Custom Colors */
+  /* CareNavX Custom Colors */
   --medical-blue: hsl(207, 90%, 54%);
   --success-green: hsl(122, 39%, 49%);
   --emergency-red: hsl(14, 87%, 55%);
@@ -56,7 +56,7 @@
   --ring: hsl(240, 4.9%, 83.9%);
   --radius: 0.5rem;
 
-  /* CareNav-X Dark Mode Colors */
+  /* CareNavX Dark Mode Colors */
   --medical-blue: hsl(207, 90%, 54%);
   --success-green: hsl(122, 39%, 49%);
   --emergency-red: hsl(14, 87%, 55%);

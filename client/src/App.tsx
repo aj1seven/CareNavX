@@ -5,11 +5,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Welcome from "@/pages/welcome";
 import OnboardingPersonal from "@/pages/onboarding-personal";
-import OnboardingInsurance from "@/pages/onboarding-insurance";
+import OnboardingEmergency from "@/pages/onboarding-emergency";
 import OnboardingMedical from "@/pages/onboarding-medical";
 import OnboardingConfirmation from "@/pages/onboarding-confirmation";
 import Help from "@/pages/help";
-import Dashboard from "@/pages/dashboard";
+import HealthAssistant from "@/pages/health-assistant";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,11 +17,11 @@ function Router() {
     <Switch>
       <Route path="/" component={Welcome} />
       <Route path="/onboarding/personal" component={OnboardingPersonal} />
-      <Route path="/onboarding/insurance" component={OnboardingInsurance} />
+      <Route path="/onboarding/emergency" component={OnboardingEmergency} />
       <Route path="/onboarding/medical" component={OnboardingMedical} />
       <Route path="/onboarding/confirmation" component={OnboardingConfirmation} />
       <Route path="/help" component={Help} />
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/health-assistant" component={HealthAssistant} />
       <Route component={NotFound} />
     </Switch>
   );

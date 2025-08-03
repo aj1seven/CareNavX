@@ -1,16 +1,8 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || ""
+  apiKey: process.env.OPENAI_API_KEY
 });
-
-export interface DocumentAnalysisResult {
-  extractedText: string;
-  documentType: string;
-  confidence: number;
-  error?: string;
-}
 
 export interface PatientDataExtraction {
   firstName?: string;
@@ -28,24 +20,34 @@ export interface PatientDataExtraction {
   emergencyContactRelationship?: string;
 }
 
+export interface MedicalAdviceResponse {
+  advice: string;
+  urgency: 'low' | 'medium' | 'high';
+  recommendations: string[];
+  followUpActions: string[];
+}
+
+export interface SymptomAnalysis {
+  possibleConditions: string[];
+  urgency: 'low' | 'medium' | 'high';
+  recommendations: string[];
+  shouldSeekCare: boolean;
+}
+
+export interface InsuranceGuidance {
+  coverageAnalysis: string;
+  recommendations: string[];
+  estimatedCosts: string;
+  nextSteps: string[];
+}
+
 /**
- * Analyzes a document image using OpenAI's vision capabilities
- * @param base64Image - Base64 encoded image data
- * @param mimeType - MIME type of the image
- * @returns Analysis result with extracted text and metadata
+ * Analyzes patient symptoms and provides medical guidance
  */
-export async function analyzeDocument(
-  base64Image: string, 
-  mimeType: string
-): Promise<DocumentAnalysisResult> {
+export async function analyzeSymptoms(symptoms: string, patientAge?: number): Promise<SymptomAnalysis> {
   try {
     if (!openai.apiKey) {
       throw new Error("OpenAI API key is not configured");
-    }
-
-    // Validate image format
-    if (!mimeType.startsWith('image/')) {
-      throw new Error("Only image files are supported for document analysis");
     }
 
     const response = await openai.chat.completions.create({
@@ -53,30 +55,72 @@ export async function analyzeDocument(
       messages: [
         {
           role: "system",
-          content: `You are a medical document analysis expert. Analyze the provided document image and extract all text content. 
-          Identify the document type (ID card, insurance card, medical record, etc.) and provide a confidence score.
-          Focus on extracting personal information, insurance details, and medical information clearly and accurately.
-          Return the result in JSON format with the following structure:
-          {
-            "extractedText": "all text found in the document",
-            "documentType": "type of document (id_card, insurance_card, medical_record, driver_license, etc.)",
-            "confidence": "confidence score between 0 and 1"
-          }`
+          content: `You are a medical AI assistant for a hospital onboarding system. 
+          Analyze patient symptoms and provide guidance. Be cautious and always recommend 
+          professional medical care when appropriate. Return JSON with:
+          - possibleConditions: array of possible conditions
+          - urgency: low/medium/high based on symptoms
+          - recommendations: array of immediate actions
+          - shouldSeekCare: boolean indicating if immediate care is needed`
         },
         {
           role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Please analyze this medical/identification document and extract all readable text, identifying the document type and your confidence in the extraction."
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${mimeType};base64,${base64Image}`
-              }
-            }
-          ],
+          content: `Patient symptoms: ${symptoms}${patientAge ? `\nPatient age: ${patientAge}` : ''}`
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 800,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    
+    return {
+      possibleConditions: Array.isArray(result.possibleConditions) ? result.possibleConditions : [],
+      urgency: ['low', 'medium', 'high'].includes(result.urgency) ? result.urgency : 'low',
+      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      shouldSeekCare: Boolean(result.shouldSeekCare)
+    };
+
+  } catch (error) {
+    console.error("Symptom analysis failed:", error);
+    return {
+      possibleConditions: [],
+      urgency: 'low',
+      recommendations: ["Please consult with a healthcare provider for proper diagnosis"],
+      shouldSeekCare: false
+    };
+  }
+}
+
+/**
+ * Provides personalized medical advice based on patient data
+ */
+export async function getMedicalAdvice(
+  patientData: any, 
+  currentSymptoms?: string
+): Promise<MedicalAdviceResponse> {
+  try {
+    if (!openai.apiKey) {
+      throw new Error("OpenAI API key is not configured");
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are a medical AI assistant providing personalized health advice. 
+          Consider the patient's medical history, medications, and current symptoms.
+          Return JSON with:
+          - advice: personalized medical advice
+          - urgency: low/medium/high
+          - recommendations: array of specific recommendations
+          - followUpActions: array of follow-up actions`
+        },
+        {
+          role: "user",
+          content: `Patient data: ${JSON.stringify(patientData)}
+          ${currentSymptoms ? `Current symptoms: ${currentSymptoms}` : ''}`
         },
       ],
       response_format: { type: "json_object" },
@@ -86,35 +130,33 @@ export async function analyzeDocument(
     const result = JSON.parse(response.choices[0].message.content || "{}");
     
     return {
-      extractedText: result.extractedText || "",
-      documentType: result.documentType || "unknown",
-      confidence: Math.max(0, Math.min(1, result.confidence || 0))
+      advice: result.advice || "Please consult with your healthcare provider for personalized medical advice.",
+      urgency: ['low', 'medium', 'high'].includes(result.urgency) ? result.urgency : 'low',
+      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      followUpActions: Array.isArray(result.followUpActions) ? result.followUpActions : []
     };
 
   } catch (error) {
-    console.error("Document analysis failed:", error);
+    console.error("Medical advice generation failed:", error);
     return {
-      extractedText: "",
-      documentType: "unknown",
-      confidence: 0,
-      error: error instanceof Error ? error.message : "Document analysis failed"
+      advice: "Please consult with your healthcare provider for personalized medical advice.",
+      urgency: 'low',
+      recommendations: ["Schedule a follow-up appointment"],
+      followUpActions: ["Contact your primary care physician"]
     };
   }
 }
 
 /**
- * Extracts structured patient data from analyzed document text
- * @param extractedText - Text extracted from document analysis
- * @returns Structured patient data that can be used to auto-fill forms
+ * Analyzes insurance information and provides guidance
  */
-export async function extractPatientData(extractedText: string): Promise<PatientDataExtraction> {
+export async function analyzeInsurance(
+  insuranceData: any, 
+  medicalProcedures?: string[]
+): Promise<InsuranceGuidance> {
   try {
     if (!openai.apiKey) {
       throw new Error("OpenAI API key is not configured");
-    }
-
-    if (!extractedText || extractedText.trim().length === 0) {
-      return {};
     }
 
     const response = await openai.chat.completions.create({
@@ -122,25 +164,18 @@ export async function extractPatientData(extractedText: string): Promise<Patient
       messages: [
         {
           role: "system",
-          content: `You are a medical data extraction specialist. Extract structured patient information from the provided document text.
-          Focus on identifying and extracting the following fields when available:
-          - Personal Information: firstName, lastName, dateOfBirth, phone, address
-          - Insurance Information: insuranceProvider, insurancePolicyNumber, insuranceGroupNumber
-          - Medical Information: allergies, medications
-          - Emergency Contact: emergencyContactName, emergencyContactPhone, emergencyContactRelationship
-          
-          Rules:
-          1. Only extract information that is clearly present in the text
-          2. Format dates as YYYY-MM-DD when possible
-          3. Clean up phone numbers to standard format
-          4. Do not guess or infer information that isn't explicitly stated
-          5. Return empty object if no relevant information is found
-          
-          Return the result in JSON format with only the available fields.`
+          content: `You are an insurance specialist AI assistant. 
+          Analyze insurance coverage and provide guidance on benefits, costs, and next steps.
+          Return JSON with:
+          - coverageAnalysis: analysis of insurance coverage
+          - recommendations: array of insurance recommendations
+          - estimatedCosts: estimated costs information
+          - nextSteps: array of next steps for insurance matters`
         },
         {
           role: "user",
-          content: `Extract patient information from this document text: ${extractedText}`
+          content: `Insurance data: ${JSON.stringify(insuranceData)}
+          ${medicalProcedures ? `Planned procedures: ${medicalProcedures.join(', ')}` : ''}`
         },
       ],
       response_format: { type: "json_object" },
@@ -149,68 +184,26 @@ export async function extractPatientData(extractedText: string): Promise<Patient
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
     
-    // Clean and validate extracted data
-    const cleanedData: PatientDataExtraction = {};
-    
-    // Personal information
-    if (result.firstName && typeof result.firstName === 'string') {
-      cleanedData.firstName = result.firstName.trim();
-    }
-    if (result.lastName && typeof result.lastName === 'string') {
-      cleanedData.lastName = result.lastName.trim();
-    }
-    if (result.dateOfBirth && typeof result.dateOfBirth === 'string') {
-      cleanedData.dateOfBirth = result.dateOfBirth.trim();
-    }
-    if (result.phone && typeof result.phone === 'string') {
-      cleanedData.phone = result.phone.trim();
-    }
-    if (result.address && typeof result.address === 'string') {
-      cleanedData.address = result.address.trim();
-    }
-    
-    // Insurance information
-    if (result.insuranceProvider && typeof result.insuranceProvider === 'string') {
-      cleanedData.insuranceProvider = result.insuranceProvider.trim();
-    }
-    if (result.insurancePolicyNumber && typeof result.insurancePolicyNumber === 'string') {
-      cleanedData.insurancePolicyNumber = result.insurancePolicyNumber.trim();
-    }
-    if (result.insuranceGroupNumber && typeof result.insuranceGroupNumber === 'string') {
-      cleanedData.insuranceGroupNumber = result.insuranceGroupNumber.trim();
-    }
-    
-    // Medical information
-    if (result.allergies && typeof result.allergies === 'string') {
-      cleanedData.allergies = result.allergies.trim();
-    }
-    if (result.medications && typeof result.medications === 'string') {
-      cleanedData.medications = result.medications.trim();
-    }
-    
-    // Emergency contact
-    if (result.emergencyContactName && typeof result.emergencyContactName === 'string') {
-      cleanedData.emergencyContactName = result.emergencyContactName.trim();
-    }
-    if (result.emergencyContactPhone && typeof result.emergencyContactPhone === 'string') {
-      cleanedData.emergencyContactPhone = result.emergencyContactPhone.trim();
-    }
-    if (result.emergencyContactRelationship && typeof result.emergencyContactRelationship === 'string') {
-      cleanedData.emergencyContactRelationship = result.emergencyContactRelationship.trim();
-    }
-    
-    return cleanedData;
+    return {
+      coverageAnalysis: result.coverageAnalysis || "Please contact your insurance provider for detailed coverage information.",
+      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      estimatedCosts: result.estimatedCosts || "Contact your insurance provider for cost estimates.",
+      nextSteps: Array.isArray(result.nextSteps) ? result.nextSteps : ["Contact your insurance provider"]
+    };
 
   } catch (error) {
-    console.error("Patient data extraction failed:", error);
-    return {};
+    console.error("Insurance analysis failed:", error);
+    return {
+      coverageAnalysis: "Please contact your insurance provider for detailed coverage information.",
+      recommendations: ["Contact your insurance provider"],
+      estimatedCosts: "Contact your insurance provider for cost estimates.",
+      nextSteps: ["Contact your insurance provider"]
+    };
   }
 }
 
 /**
- * Analyzes patient query text for smart form assistance
- * @param queryText - Natural language query from patient or staff
- * @returns Structured response with suggestions and actions
+ * Analyzes patient query for smart form assistance
  */
 export async function analyzePatientQuery(queryText: string): Promise<{
   intent: string;
@@ -267,3 +260,63 @@ export async function analyzePatientQuery(queryText: string): Promise<{
     };
   }
 }
+
+/**
+ * Generates personalized health recommendations
+ */
+export async function generateHealthRecommendations(
+  patientData: any,
+  currentHealthStatus?: string
+): Promise<{
+  recommendations: string[];
+  lifestyleTips: string[];
+  preventiveMeasures: string[];
+  priorityLevel: 'low' | 'medium' | 'high';
+}> {
+  try {
+    if (!openai.apiKey) {
+      throw new Error("OpenAI API key is not configured");
+    }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are a health AI assistant providing personalized health recommendations.
+          Consider the patient's medical history, age, and current health status.
+          Return JSON with:
+          - recommendations: array of health recommendations
+          - lifestyleTips: array of lifestyle improvement tips
+          - preventiveMeasures: array of preventive health measures
+          - priorityLevel: low/medium/high priority for health improvements`
+        },
+        {
+          role: "user",
+          content: `Patient data: ${JSON.stringify(patientData)}
+          ${currentHealthStatus ? `Current health status: ${currentHealthStatus}` : ''}`
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 800,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    
+    return {
+      recommendations: Array.isArray(result.recommendations) ? result.recommendations : [],
+      lifestyleTips: Array.isArray(result.lifestyleTips) ? result.lifestyleTips : [],
+      preventiveMeasures: Array.isArray(result.preventiveMeasures) ? result.preventiveMeasures : [],
+      priorityLevel: ['low', 'medium', 'high'].includes(result.priorityLevel) ? result.priorityLevel : 'low'
+    };
+
+  } catch (error) {
+    console.error("Health recommendations generation failed:", error);
+    return {
+      recommendations: ["Schedule regular check-ups with your healthcare provider"],
+      lifestyleTips: ["Maintain a balanced diet and regular exercise routine"],
+      preventiveMeasures: ["Stay up to date with recommended vaccinations"],
+      priorityLevel: 'low'
+    };
+  }
+} 

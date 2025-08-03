@@ -33,7 +33,7 @@ export default function Help() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm CareNav Assistant. I'm here to help you with your hospital onboarding process. How can I assist you today?",
+              content: "Hello! I'm CareNavX Assistant. I'm here to help you with your hospital onboarding process. How can I assist you today?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -118,15 +118,7 @@ export default function Help() {
         setInputMessage(message);
       }
     },
-    {
-      icon: Shield,
-      title: "Document Upload",
-      description: "Issues with uploading documents",
-      action: () => {
-        const message = "I'm having trouble uploading my documents. What file types are supported?";
-        setInputMessage(message);
-      }
-    },
+
     {
       icon: Heart,
       title: "Medical Information",
@@ -154,7 +146,7 @@ export default function Help() {
     },
     {
       question: "What documents do I need?",
-      answer: "You'll need a valid ID, insurance card, and any relevant medical documents. Our AI can scan these automatically."
+      answer: "You'll need a valid ID, insurance card, and any relevant medical documents."
     },
     {
       question: "Is my information secure?",
@@ -178,7 +170,7 @@ export default function Help() {
               <CardHeader className="border-b border-gray-100">
                 <CardTitle className="flex items-center text-xl text-gray-900">
                   <Bot className="h-6 w-6 text-blue-600 mr-3" />
-                  CareNav Assistant
+                  CareNavX Assistant
                 </CardTitle>
                 <p className="text-gray-600">
                   Get instant help with your onboarding process
@@ -299,7 +291,7 @@ export default function Help() {
                 <div className="flex items-center space-x-3">
                   <Mail className="h-4 w-4 text-blue-600" />
                   <div>
-                    <p className="font-medium text-gray-900">support@carenav.com</p>
+                    <p className="font-medium text-gray-900">support@carenavx.com</p>
                     <p className="text-sm text-gray-500">Email Support</p>
                   </div>
                 </div>

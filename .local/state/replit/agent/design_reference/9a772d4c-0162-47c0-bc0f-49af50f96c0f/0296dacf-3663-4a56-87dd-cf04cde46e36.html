@@ -1,0 +1,425 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareNav-X - Hospital Onboarding System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif'],
+                },
+                colors: {
+                    'medical-blue': '#1976D2',
+                    'success-green': '#4CAF50',
+                    'emergency-red': '#FF5722',
+                    'neutral-bg': '#FAFAFA',
+                    'card-white': '#FFFFFF',
+                    'text-primary': '#333333',
+                    'text-secondary': '#757575',
+                }
+            }
+        }
+    };
+    </script>
+</head>
+<body class="font-inter bg-neutral-bg">
+    <!-- @COMPONENT: AppHeader -->
+    <header class="bg-card-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-hospital text-medical-blue text-2xl"></i>
+                        <h1 class="text-xl font-bold text-text-primary">CareNav-X</h1>
+                    </div>
+                    <span class="text-text-secondary text-sm">Hospital Onboarding System</span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Emergency Mode Toggle -->
+                    <div class="flex items-center space-x-2 bg-emergency-red bg-opacity-10 px-3 py-1 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-emergency-red"></i>
+                        <span class="text-emergency-red font-medium text-sm">Emergency Mode</span>
+                        <button class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-emergency-red focus:ring-offset-2" data-event="click:toggleEmergencyMode">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform translate-x-1"></span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32" alt="Staff member" data-mock="true">
+                        <span class="text-text-primary font-medium" data-bind="user.name">Dr. Sarah Johnson</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- @COMPONENT: DashboardOverview -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Quick Stats -->
+            <div class="lg:col-span-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-card-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Patients Today</p>
+                                <p class="text-2xl font-bold text-text-primary" data-bind="stats.patientsToday">127</p>
+                            </div>
+                            <div class="bg-medical-blue bg-opacity-10 p-3 rounded-full">
+                                <i class="fas fa-user-injured text-medical-blue text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-success-green text-sm font-medium">↗ 12% from yesterday</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-card-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Pending Onboarding</p>
+                                <p class="text-2xl font-bold text-text-primary" data-bind="stats.pendingOnboarding">8</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-clock text-yellow-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-text-secondary text-sm">Average wait: 12 min</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-card-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-text-secondary text-sm font-medium">Emergency Cases</p>
+                                <p class="text-2xl font-bold text-text-primary" data-bind="stats.emergencyCases">3</p>
+                            </div>
+                            <div class="bg-emergency-red bg-opacity-10 p-3 rounded-full">
+                                <i class="fas fa-ambulance text-emergency-red text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-emergency-red text-sm font-medium">Immediate attention</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Onboarding Form -->
+                <!-- @COMPONENT: OnboardingForm -->
+                <div class="bg-card-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-text-primary">Patient Onboarding</h2>
+                            <div class="flex space-x-2">
+                                <button class="bg-medical-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-event="click:startAIAnalysis">
+                                    <i class="fas fa-robot mr-2"></i>AI Document Scan
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Indicator -->
+                        <div class="mt-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center text-medical-blue">
+                                    <div class="w-8 h-8 bg-medical-blue rounded-full flex items-center justify-center text-white text-sm font-medium">1</div>
+                                    <span class="ml-2 font-medium">Personal Info</span>
+                                </div>
+                                <div class="flex-1 h-1 bg-medical-blue rounded"></div>
+                                <div class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm font-medium">2</div>
+                                    <span class="ml-2">Insurance</span>
+                                </div>
+                                <div class="flex-1 h-1 bg-gray-200 rounded"></div>
+                                <div class="flex items-center text-gray-400">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm font-medium">3</div>
+                                    <span class="ml-2">Medical History</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <form class="space-y-6" data-implementation="React Hook Form with Zod validation">
+                            <!-- Personal Information Section -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">First Name *</label>
+                                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" placeholder="Enter first name" data-bind="patient.firstName" data-mock="true">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Last Name *</label>
+                                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" placeholder="Enter last name" data-bind="patient.lastName" data-mock="true">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Date of Birth *</label>
+                                    <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" data-bind="patient.dateOfBirth" data-mock="true">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Phone Number *</label>
+                                    <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" placeholder="(555) 123-4567" data-bind="patient.phone" data-mock="true">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-primary mb-2">Address *</label>
+                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent h-20" placeholder="Enter full address" data-bind="patient.address" data-mock="true"></textarea>
+                            </div>
+
+                            <!-- Emergency Contact -->
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 class="font-medium text-text-primary mb-3">Emergency Contact</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-text-secondary mb-1">Contact Name</label>
+                                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" placeholder="Full name" data-bind="patient.emergencyContact.name" data-mock="true">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-text-secondary mb-1">Relationship</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-blue focus:border-transparent" data-bind="patient.emergencyContact.relationship" data-mock="true">
+                                            <option>Select relationship</option>
+                                            <option>Spouse</option>
+                                            <option>Parent</option>
+                                            <option>Child</option>
+                                            <option>Sibling</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Document Upload Area -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-medical-blue transition-colors">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-text-primary font-medium mb-2">Upload Documents for AI Analysis</p>
+                                <p class="text-text-secondary text-sm mb-4">Drag and drop ID, insurance cards, or medical records</p>
+                                <button type="button" class="bg-medical-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-event="click:uploadDocument">
+                                    Choose Files
+                                </button>
+                                <!-- @FUNCTIONALITY: File upload with AI document analysis -->
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex justify-between pt-6 border-t border-gray-200">
+                                <button type="button" class="px-6 py-2 text-text-secondary border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" data-event="click:saveDraft">
+                                    Save Draft
+                                </button>
+                                <button type="submit" class="bg-medical-blue text-white px-8 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:proceedNext">
+                                    Continue to Insurance
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: OnboardingForm -->
+            </div>
+
+            <!-- Sidebar - Quick Actions & Navigation -->
+            <!-- @COMPONENT: QuickActionsSidebar -->
+            <div class="space-y-6">
+                <!-- Hospital Navigation -->
+                <div class="bg-card-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="font-semibold text-text-primary mb-4">Hospital Navigation</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-directions text-medical-blue"></i>
+                                <span class="text-text-primary font-medium">Emergency Room</span>
+                            </div>
+                            <span class="text-success-green text-sm">2 min</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-bed text-text-secondary"></i>
+                                <span class="text-text-primary">ICU</span>
+                            </div>
+                            <span class="text-text-secondary text-sm">5 min</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-x-ray text-text-secondary"></i>
+                                <span class="text-text-primary">Radiology</span>
+                            </div>
+                            <span class="text-text-secondary text-sm">8 min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="bg-card-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="font-semibold text-text-primary mb-4">Recent Activities</h3>
+                    <div class="space-y-3">
+                        <!-- @MAP: recentActivities.map(activity => ( -->
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="w-2 h-2 bg-success-green rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-text-primary text-sm font-medium">Patient onboarded</p>
+                                <p class="text-text-secondary text-xs">John Smith - 2 min ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="w-2 h-2 bg-medical-blue rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-text-primary text-sm font-medium">Insurance verified</p>
+                                <p class="text-text-secondary text-xs">Emma Wilson - 5 min ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3" data-mock="true">
+                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-text-primary text-sm font-medium">Document pending</p>
+                                <p class="text-text-secondary text-xs">Michael Brown - 8 min ago</p>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-card-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="font-semibold text-text-primary mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-3" data-event="click:newEmergencyOnboarding">
+                            <i class="fas fa-plus-circle text-emergency-red"></i>
+                            <span class="text-text-primary">Emergency Onboarding</span>
+                        </button>
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-3" data-event="click:viewWaitingList">
+                            <i class="fas fa-list text-medical-blue"></i>
+                            <span class="text-text-primary">View Waiting List</span>
+                        </button>
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-3" data-event="click:generateReport">
+                            <i class="fas fa-chart-bar text-success-green"></i>
+                            <span class="text-text-primary">Daily Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: QuickActionsSidebar -->
+        </div>
+        <!-- @END_COMPONENT: DashboardOverview -->
+    </main>
+
+    <!-- @COMPONENT: OnboardingConfirmationModal -->
+    <!-- Confirmation Modal (Hidden by default) -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-card-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-success-green bg-opacity-10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-success-green text-3xl"></i>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-text-primary mb-2">Onboarding Complete!</h3>
+                <p class="text-text-secondary mb-6">Patient has been successfully registered and verified.</p>
+                
+                <!-- Admission Location -->
+                <div class="bg-medical-blue bg-opacity-10 rounded-lg p-4 mb-6">
+                    <h4 class="font-semibold text-medical-blue mb-2">Patient Admission Location</h4>
+                    <div class="flex items-center justify-center space-x-2">
+                        <i class="fas fa-map-marker-alt text-medical-blue"></i>
+                        <span class="font-medium text-text-primary" data-bind="admissionLocation">Emergency Room - Bed 12A</span>
+                    </div>
+                    <p class="text-text-secondary text-sm mt-2">Floor 2, Wing East</p>
+                </div>
+
+                <!-- Patient Details Summary -->
+                <div class="text-left bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 class="font-medium text-text-primary mb-2">Patient Summary</h4>
+                    <dl class="text-sm space-y-1">
+                        <div class="flex justify-between">
+                            <dt class="text-text-secondary">Name:</dt>
+                            <dd class="text-text-primary font-medium" data-bind="patient.fullName" data-mock="true">John Smith</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-text-secondary">Patient ID:</dt>
+                            <dd class="text-text-primary font-medium" data-bind="patient.id" data-mock="true">PT-2024-001892</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-text-secondary">Insurance:</dt>
+                            <dd class="text-success-green font-medium" data-bind="patient.insuranceStatus" data-mock="true">Verified</dd>
+                        </div>
+                    </dl>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button class="flex-1 bg-medical-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:printWristband">
+                        <i class="fas fa-print mr-2"></i>Print Wristband
+                    </button>
+                    <button class="flex-1 bg-success-green text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium" data-event="click:closeModal">
+                        <i class="fas fa-check mr-2"></i>Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: OnboardingConfirmationModal -->
+
+    <!-- @STATE: modalOpen:boolean = false -->
+    <!-- @STATE: currentStep:number = 1 -->
+    <!-- @STATE: emergencyMode:boolean = false -->
+
+    <script>
+    (function() {
+        // TODO: Implement React state management with TanStack Query
+        // TODO: Implement form validation with React Hook Form and Zod
+        // TODO: Implement AI document analysis integration
+        
+        // Mock demonstration of modal functionality
+        function showConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        // Mock form submission
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('[data-event*="proceedNext"]')) {
+                e.preventDefault();
+                // Simulate completion after all steps
+                setTimeout(showConfirmationModal, 1000);
+            }
+            
+            if (e.target.closest('[data-event*="closeModal"]')) {
+                const modal = document.getElementById('confirmationModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            }
+        });
+
+        // Emergency mode toggle simulation
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('[data-event*="toggleEmergencyMode"]')) {
+                const toggle = e.target.closest('button');
+                const span = toggle.querySelector('span');
+                const isActive = span.classList.contains('translate-x-6');
+                
+                if (isActive) {
+                    span.classList.remove('translate-x-6', 'bg-emergency-red');
+                    span.classList.add('translate-x-1', 'bg-white');
+                    toggle.classList.remove('bg-emergency-red');
+                    toggle.classList.add('bg-gray-200');
+                } else {
+                    span.classList.remove('translate-x-1', 'bg-white');
+                    span.classList.add('translate-x-6', 'bg-white');
+                    toggle.classList.remove('bg-gray-200');
+                    toggle.classList.add('bg-emergency-red');
+                }
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

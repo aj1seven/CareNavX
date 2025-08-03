@@ -1,30 +1,29 @@
 import { 
-  type Patient, 
-  type InsertPatient, 
-  type Document, 
-  type InsertDocument,
-  type Activity,
-  type InsertActivity,
-  type User, 
-  type InsertUser 
-} from "@shared/schema";
-import { randomUUID } from "crypto";
+  Patient, 
+  Activity, 
+  User,
+  Document,
+  type IPatient, 
+  type IActivity,
+  type IUser,
+  type IDocument
+} from "./db";
 
 export interface IStorage {
   // Patient operations
-  getPatient(id: string): Promise<Patient | undefined>;
-  getAllPatients(): Promise<Patient[]>;
-  createPatient(patient: InsertPatient): Promise<Patient>;
-  updatePatient(id: string, updates: Partial<Patient>): Promise<Patient | undefined>;
-  completeOnboarding(id: string, admissionLocation: string): Promise<Patient | undefined>;
-  
-  // Document operations
-  createDocument(document: InsertDocument): Promise<Document>;
-  getPatientDocuments(patientId: string): Promise<Document[]>;
+  getPatient(id: string): Promise<IPatient | undefined>;
+  getAllPatients(): Promise<IPatient[]>;
+  createPatient(patient: Partial<IPatient>): Promise<IPatient>;
+  updatePatient(id: string, updates: Partial<IPatient>): Promise<IPatient | undefined>;
+  completeOnboarding(id: string, admissionLocation: string): Promise<IPatient | undefined>;
   
   // Activity operations
-  createActivity(activity: InsertActivity): Promise<Activity>;
-  getRecentActivities(limit?: number): Promise<Activity[]>;
+  createActivity(activity: Partial<IActivity>): Promise<IActivity>;
+  getRecentActivities(limit?: number): Promise<IActivity[]>;
+  
+  // Document operations
+  createDocument(document: Partial<IDocument>): Promise<IDocument>;
+  getPatientDocuments(patientId: string): Promise<IDocument[]>;
   
   // Dashboard stats
   getDashboardStats(): Promise<{
@@ -35,126 +34,106 @@ export interface IStorage {
   }>;
   
   // User operations
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<IUser | undefined>;
+  getUserByUsername(username: string): Promise<IUser | undefined>;
+  createUser(user: Partial<IUser>): Promise<IUser>;
 }
 
-export class MemStorage implements IStorage {
-  private patients: Map<string, Patient> = new Map();
-  private documents: Map<string, Document> = new Map();
-  private activities: Map<string, Activity> = new Map();
-  private users: Map<string, User> = new Map();
-
-  constructor() {
-    // Initialize with sample staff user
-    const sampleUser: User = {
-      id: randomUUID(),
-      username: "dr.johnson",
-      password: "password123",
-      name: "Dr. Sarah Johnson",
-      role: "doctor"
-    };
-    this.users.set(sampleUser.id, sampleUser);
+export class MongoDBStorage implements IStorage {
+  async getPatient(id: string): Promise<IPatient | undefined> {
+    try {
+      const patient = await Patient.findById(id);
+      return patient ? patient.toObject() as unknown as IPatient : undefined;
+    } catch (error) {
+      console.error('Error getting patient:', error);
+      return undefined;
+    }
   }
 
-  async getPatient(id: string): Promise<Patient | undefined> {
-    return this.patients.get(id);
+  async getAllPatients(): Promise<IPatient[]> {
+    try {
+      const patients = await Patient.find().sort({ createdAt: -1 });
+      return patients.map(patient => patient.toObject() as unknown as IPatient);
+    } catch (error) {
+      console.error('Error getting all patients:', error);
+      return [];
+    }
   }
 
-  async getAllPatients(): Promise<Patient[]> {
-    return Array.from(this.patients.values());
+  async createPatient(insertPatient: Partial<IPatient>): Promise<IPatient> {
+    try {
+      const patient = new Patient({
+        ...insertPatient,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      const savedPatient = await patient.save();
+      return savedPatient.toObject() as unknown as IPatient;
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      throw error;
+    }
   }
 
-  async createPatient(insertPatient: InsertPatient): Promise<Patient> {
-    const id = randomUUID();
-    const now = new Date();
-    const patient: Patient = { 
-      ...insertPatient, 
-      id,
-      emergencyContactName: insertPatient.emergencyContactName || null,
-      emergencyContactRelationship: insertPatient.emergencyContactRelationship || null,
-      emergencyContactPhone: insertPatient.emergencyContactPhone || null,
-      insuranceProvider: insertPatient.insuranceProvider || null,
-      insurancePolicyNumber: insertPatient.insurancePolicyNumber || null,
-      insuranceGroupNumber: insertPatient.insuranceGroupNumber || null,
-      insuranceStatus: insertPatient.insuranceStatus || null,
-      medicalHistory: insertPatient.medicalHistory || null,
-      allergies: insertPatient.allergies || null,
-      medications: insertPatient.medications || null,
-      onboardingStep: insertPatient.onboardingStep ?? 1,
-      isCompleted: insertPatient.isCompleted ?? false,
-      isEmergency: insertPatient.isEmergency ?? false,
-      admissionLocation: insertPatient.admissionLocation || null,
-      createdAt: now,
-      updatedAt: now
-    };
-    this.patients.set(id, patient);
-    return patient;
+  async updatePatient(id: string, updates: Partial<IPatient>): Promise<IPatient | undefined> {
+    try {
+      const patient = await Patient.findByIdAndUpdate(
+        id,
+        { ...updates, updatedAt: new Date() },
+        { new: true }
+      );
+      return patient ? patient.toObject() as unknown as IPatient : undefined;
+    } catch (error) {
+      console.error('Error updating patient:', error);
+      return undefined;
+    }
   }
 
-  async updatePatient(id: string, updates: Partial<Patient>): Promise<Patient | undefined> {
-    const patient = this.patients.get(id);
-    if (!patient) return undefined;
-    
-    const updatedPatient: Patient = {
-      ...patient,
-      ...updates,
-      updatedAt: new Date()
-    };
-    this.patients.set(id, updatedPatient);
-    return updatedPatient;
+  async completeOnboarding(id: string, admissionLocation: string): Promise<IPatient | undefined> {
+    try {
+      const patient = await Patient.findByIdAndUpdate(
+        id,
+        { 
+          isCompleted: true, 
+          admissionLocation,
+          updatedAt: new Date() 
+        },
+        { new: true }
+      );
+      return patient ? patient.toObject() as unknown as IPatient : undefined;
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      return undefined;
+    }
   }
 
-  async completeOnboarding(id: string, admissionLocation: string): Promise<Patient | undefined> {
-    const patient = this.patients.get(id);
-    if (!patient) return undefined;
-    
-    const updatedPatient: Patient = {
-      ...patient,
-      isCompleted: true,
-      admissionLocation,
-      updatedAt: new Date()
-    };
-    this.patients.set(id, updatedPatient);
-    return updatedPatient;
+
+
+  async createActivity(insertActivity: Partial<IActivity>): Promise<IActivity> {
+    try {
+      const activity = new Activity({
+        ...insertActivity,
+        createdAt: new Date()
+      });
+      const savedActivity = await activity.save();
+      return savedActivity.toObject() as unknown as IActivity;
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      throw error;
+    }
   }
 
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const id = randomUUID();
-    const now = new Date();
-    const document: Document = { 
-      ...insertDocument, 
-      id,
-      patientId: insertDocument.patientId || null,
-      analysisResult: insertDocument.analysisResult || null,
-      createdAt: now
-    };
-    this.documents.set(id, document);
-    return document;
-  }
-
-  async getPatientDocuments(patientId: string): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(doc => doc.patientId === patientId);
-  }
-
-  async createActivity(insertActivity: InsertActivity): Promise<Activity> {
-    const id = randomUUID();
-    const now = new Date();
-    const activity: Activity = { 
-      ...insertActivity, 
-      id,
-      patientId: insertActivity.patientId || null,
-      createdAt: now
-    };
-    this.activities.set(id, activity);
-    return activity;
-  }
-
-  async getRecentActivities(limit: number = 10): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
-      .slice(0, limit);
+  async getRecentActivities(limit: number = 10): Promise<IActivity[]> {
+    try {
+      const activities = await Activity.find()
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .populate('patientId', 'firstName lastName');
+      return activities.map(activity => activity.toObject() as unknown as IActivity);
+    } catch (error) {
+      console.error('Error getting recent activities:', error);
+      return [];
+    }
   }
 
   async getDashboardStats(): Promise<{
@@ -163,43 +142,95 @@ export class MemStorage implements IStorage {
     inProgress: number;
     averageTime: number;
   }> {
-    const patients = Array.from(this.patients.values());
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const totalPatients = patients.length;
-    const completedToday = patients.filter(p => 
-      p.isCompleted && p.updatedAt && p.updatedAt >= today
-    ).length;
-    const inProgress = patients.filter(p => !p.isCompleted && p.onboardingStep > 0).length;
-    
-    // Calculate average time (simplified - just return 8 minutes for now)
-    const averageTime = 8;
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const totalPatients = await Patient.countDocuments();
+      const completedToday = await Patient.countDocuments({
+        isCompleted: true,
+        updatedAt: { $gte: today }
+      });
+      const inProgress = await Patient.countDocuments({
+        isCompleted: false,
+        onboardingStep: { $gt: 0 }
+      });
+      
+      // Calculate average time (simplified - just return 8 minutes for now)
+      const averageTime = 8;
 
-    return {
-      totalPatients,
-      completedToday,
-      inProgress,
-      averageTime
-    };
+      return {
+        totalPatients,
+        completedToday,
+        inProgress,
+        averageTime
+      };
+    } catch (error) {
+      console.error('Error getting dashboard stats:', error);
+      return {
+        totalPatients: 0,
+        completedToday: 0,
+        inProgress: 0,
+        averageTime: 8
+      };
+    }
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: string): Promise<IUser | undefined> {
+    try {
+      const user = await User.findById(id);
+      return user ? user.toObject() as unknown as IUser : undefined;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return undefined;
+    }
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getUserByUsername(username: string): Promise<IUser | undefined> {
+    try {
+      const user = await User.findOne({ username });
+      return user ? user.toObject() as unknown as IUser : undefined;
+    } catch (error) {
+      console.error('Error getting user by username:', error);
+      return undefined;
+    }
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id, role: insertUser.role || null };
-    this.users.set(id, user);
-    return user;
+  async createUser(insertUser: Partial<IUser>): Promise<IUser> {
+    try {
+      const user = new User(insertUser);
+      const savedUser = await user.save();
+      return savedUser.toObject() as unknown as IUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  // Document operations
+  async createDocument(insertDocument: Partial<IDocument>): Promise<IDocument> {
+    try {
+      const document = new Document({
+        ...insertDocument,
+        uploadedAt: new Date()
+      });
+      const savedDocument = await document.save();
+      return savedDocument.toObject() as unknown as IDocument;
+    } catch (error) {
+      console.error('Error creating document:', error);
+      throw error;
+    }
+  }
+
+  async getPatientDocuments(patientId: string): Promise<IDocument[]> {
+    try {
+      const documents = await Document.find({ patientId }).sort({ uploadedAt: -1 });
+      return documents.map(document => document.toObject() as unknown as IDocument);
+    } catch (error) {
+      console.error('Error getting patient documents:', error);
+      return [];
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new MongoDBStorage();

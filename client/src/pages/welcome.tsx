@@ -14,8 +14,10 @@ import {
   CheckCircle,
   Phone,
   MapPin,
-  Ambulance
+  Ambulance,
+  Brain
 } from "lucide-react";
+import SimpleUpload from "@/components/simple-upload";
 
 export default function Welcome() {
   const [selectedOnboardingType, setSelectedOnboardingType] = useState<'standard' | 'emergency' | null>(null);
@@ -45,31 +47,39 @@ export default function Welcome() {
 
   const onboardingSteps = [
     "Personal Information",
-    "Insurance Details", 
-    "Medical History",
-    "Document Verification",
-    "Location Assignment"
+    "Smart Medical History", 
+    "Confirmation & Assignment"
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
+      {/* Header - Consistent CareNavX Branding */}
       <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-blue-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                <Hospital className="h-6 w-6 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Stethoscope className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                  CareNav
-                </h1>
-                <p className="text-xs text-gray-500">Hospital Onboarding</p>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  CareNavX
+                </span>
+                <span className="text-xs text-gray-500 -mt-1">Smart Healthcare</span>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link href="/health-assistant">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-amber-700 hover:text-amber-800 hover:bg-amber-50 border border-amber-200 hover:border-amber-300"
+                >
+                  <Brain className="h-4 w-4 mr-2" />
+                  Health Assistant
+                </Button>
+              </Link>
               <Link href="/help">
                 <Button variant="ghost" size="sm">
                   <Phone className="h-4 w-4 mr-2" />
@@ -95,8 +105,8 @@ export default function Welcome() {
           
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Welcome to{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              CareNav
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+              CareNavX
             </span>
           </h1>
           
@@ -129,7 +139,7 @@ export default function Welcome() {
                 <div className="space-y-2 mb-6">
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock className="h-4 w-4 mr-2" />
-                    <span>Estimated time: 8-12 minutes</span>
+                    <span>Estimated time: 6-8 minutes</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <Shield className="h-4 w-4 mr-2" />
@@ -177,7 +187,7 @@ export default function Welcome() {
                   </div>
                 </div>
                 {selectedOnboardingType === 'emergency' && (
-                  <Link href="/onboarding/personal?emergency=true">
+                  <Link href="/onboarding/emergency">
                     <Button className="w-full bg-red-600 hover:bg-red-700">
                       Start Emergency Onboarding
                       <ArrowRight className="h-4 w-4 ml-2" />
@@ -246,6 +256,18 @@ export default function Welcome() {
               (555) 123-CARE
             </span>
           </div>
+        </div>
+
+        {/* Test Upload Section */}
+        <div className="mt-16">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>Test File Upload</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SimpleUpload />
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

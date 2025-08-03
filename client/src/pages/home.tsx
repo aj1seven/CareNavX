@@ -69,7 +69,7 @@ export default function Home() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Hospital className="h-8 w-8 text-medical-blue" />
-                <h1 className="text-xl font-bold text-text-primary">CareNav-X</h1>
+                <h1 className="text-xl font-bold text-text-primary">CareNavX</h1>
               </div>
               <span className="text-text-secondary text-sm">Hospital Onboarding System</span>
             </div>

@@ -7,8 +7,9 @@ import {
   HelpCircle, 
   LayoutDashboard,
   Heart,
-  FileText,
-  CheckCircle
+  Brain,
+  CheckCircle,
+  Stethoscope
 } from "lucide-react";
 
 interface NavigationProps {
@@ -33,10 +34,10 @@ export default function Navigation({ currentStep, patientId }: NavigationProps) 
       description: "Home"
     },
     {
-      path: "/dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      description: "Patient Status"
+      path: "/health-assistant",
+      label: "Health Assistant",
+      icon: Brain,
+      description: "AI Health"
     },
     {
       path: "/help",
@@ -46,7 +47,7 @@ export default function Navigation({ currentStep, patientId }: NavigationProps) 
     }
   ];
 
-  // Show onboarding steps if we have a patient ID
+  // Show onboarding steps if we have a patient ID (3-step flow)
   const onboardingSteps = patientId ? [
     {
       path: `/onboarding/personal?patientId=${patientId}`,
@@ -56,25 +57,18 @@ export default function Navigation({ currentStep, patientId }: NavigationProps) 
       description: "Step 1"
     },
     {
-      path: `/onboarding/insurance?patientId=${patientId}`,
-      label: "Insurance",
-      icon: FileText,
-      step: "insurance",
-      description: "Step 2"
-    },
-    {
       path: `/onboarding/medical?patientId=${patientId}`,
       label: "Medical",
-      icon: Heart,
+      icon: Brain,
       step: "medical",
-      description: "Step 3"
+      description: "Step 2"
     },
     {
       path: `/onboarding/confirmation?patientId=${patientId}`,
       label: "Complete",
       icon: CheckCircle,
       step: "confirmation",
-      description: "Step 4"
+      description: "Step 3"
     }
   ] : [];
 
@@ -82,15 +76,18 @@ export default function Navigation({ currentStep, patientId }: NavigationProps) 
     <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-blue-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Logo - Consistent CareNavX Branding */}
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Heart className="h-4 w-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Stethoscope className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                CareNav
-              </span>
+              <div className="flex flex-col">
+                <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent">
+                  CareNavX
+                </span>
+                <span className="text-xs text-gray-500 -mt-1">Smart Healthcare</span>
+              </div>
             </div>
           </Link>
 
